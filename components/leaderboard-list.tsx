@@ -1,10 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Trophy, Medal, Award } from 'lucide-react'
-import type { LeaderboardEntry } from '@/lib/supabase/types'
 
 interface LeaderboardListProps {
-  entries: (LeaderboardEntry & { profiles: { display_name: string } | null })[]
+  entries: {
+    user_id: string | null
+    total_pushups: number | null
+    week_start: string | null
+    profiles: { display_name: string } | null
+  }[]
 }
 
 export function LeaderboardList({ entries }: LeaderboardListProps) {
