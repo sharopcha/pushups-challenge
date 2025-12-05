@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LeaderboardList } from '@/components/leaderboard-list'
+import { LeaderboardBarChart } from '@/components/charts/leaderboard-bar-chart'
 
 export default async function LeaderboardPage() {
   const supabase = await createClient()
@@ -34,7 +35,13 @@ export default async function LeaderboardPage() {
         </p>
       </div>
 
-      <LeaderboardList entries={leaderboard || []} />
+      <div className="space-y-6">
+        {/* Chart Visualization */}
+        <LeaderboardBarChart entries={leaderboard || []} />
+
+        {/* Detailed List */}
+        <LeaderboardList entries={leaderboard || []} />
+      </div>
     </div>
   )
 }

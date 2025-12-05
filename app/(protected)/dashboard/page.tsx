@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { AddPushupForm } from '@/components/add-pushup-form'
 import { StatsCard } from '@/components/stats-card'
 import { DailyHistoryList } from '@/components/daily-history-list'
+import { SevenDayLineChart } from '@/components/charts/seven-day-line-chart'
+import { WeeklyBarChart } from '@/components/charts/weekly-bar-chart'
 import { Activity, Calendar, TrendingUp } from 'lucide-react'
 import { getTodayStart, getWeekStart, getDaysAgo, toISOString } from '@/lib/date-utils'
 
@@ -86,6 +88,12 @@ export default async function DashboardPage() {
             icon={Calendar}
             description="Days with activity"
           />
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SevenDayLineChart data={history} />
+          <WeeklyBarChart data={history} />
         </div>
 
         {/* Daily History */}
