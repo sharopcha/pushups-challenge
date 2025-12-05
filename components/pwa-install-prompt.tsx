@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { Download, X } from 'lucide-react'
+import { Download, X, Check } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -93,7 +93,7 @@ export function PWAInstallPrompt() {
 
   return (
     <Sheet open={showPrompt} onOpenChange={setShowPrompt}>
-      <SheetContent side="bottom" className="rounded-t-xl">
+      <SheetContent side="bottom" className="rounded-t-xl pb-8 px-8">
         <button
           onClick={handleDismiss}
           className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100"
@@ -101,41 +101,47 @@ export function PWAInstallPrompt() {
           <X className="h-4 w-4" />
         </button>
 
-        <SheetHeader className="mb-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-2xl">
+        <SheetHeader className="mb-6">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl flex-shrink-0">
               💪
             </div>
-            <div>
-              <SheetTitle>Install Push-Up Challenge</SheetTitle>
-              <SheetDescription className="text-xs">
+            <div className="text-left">
+              <SheetTitle className="text-lg">Install Push-Up Challenge</SheetTitle>
+              <SheetDescription className="text-sm">
                 Get the app on your home screen
               </SheetDescription>
             </div>
           </div>
         </SheetHeader>
 
-        <div className="space-y-3 mb-6">
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-4 mb-8">
+          <p className="text-sm text-muted-foreground font-medium">
             Install our app for a better experience:
           </p>
-          <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
+          <ul className="space-y-3 text-sm">
+            <li className="flex items-center gap-3">
+              <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Check className="h-3 w-3 text-primary" />
+              </div>
               <span>Quick access from your home screen</span>
             </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
+            <li className="flex items-center gap-3">
+              <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Check className="h-3 w-3 text-primary" />
+              </div>
               <span>Works offline</span>
             </li>
-            <li className="flex items-center gap-2">
-              <span className="text-primary">✓</span>
+            <li className="flex items-center gap-3">
+              <div className="h-5 w-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <Check className="h-3 w-3 text-primary" />
+              </div>
               <span>Native app-like experience</span>
             </li>
           </ul>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 pb-4">
           <Button
             onClick={handleInstallClick}
             className="flex-1"
