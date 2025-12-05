@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "supabase:gen-types": "npx supabase gen types typescript --local > lib/supabase/types/database.types.ts"
   },
   "dependencies": {
     "@nivo/bar": "^0.99.0",
