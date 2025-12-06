@@ -19,52 +19,78 @@ const supabase = createClient(PROJECT_DB_URL, SERVICE_ROLE_KEY, {
 
 interface Payload {
   userId: string;
-  count: number; // last added pushups
+  count: number;
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+    return new Response("Method not allowed", { 
+      status: 405,
+      headers: corsHeaders 
+    });
   }
 
-  const body = (await req.json()) as Payload;
+  try {
+    const body = (await req.json()) as Payload;
+    const { userId, count } = body;
 
-  const { userId, count } = body;
+    const { data: subs, error } = await supabase
+      .from("push_subscriptions")
+      .select("endpoint, p256dh, auth")
+      .eq("user_id", userId);
 
-  const { data: subs, error } = await supabase
-    .from("push_subscriptions")
-    .select("endpoint, p256dh, auth")
-    .eq("user_id", userId);
+    if (error) {
+      console.error(error);
+      return new Response("Error fetching subs", { 
+        status: 500,
+        headers: corsHeaders 
+      });
+    }
 
-  if (error) {
-    console.error(error);
-    return new Response("Error fetching subs", { status: 500 });
-  }
+    const payload = JSON.stringify({
+      title: "Nice set! 💪",
+      body: `You just added ${count} push-ups. Keep it up!`,
+      url: "/dashboard",
+    });
 
-  const payload = JSON.stringify({
-    title: "Nice set! 💪",
-    body: `You just added ${count} push-ups. Keep it up!`,
-    url: "/dashboard",
-  });
-
-  const promises =
-    subs?.map((sub) =>
-      webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth,
+    const promises =
+      subs?.map((sub) =>
+        webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth,
+            },
           },
-        },
-        payload
-      ).catch((e: any) => {
-        console.error("Push error", e?.statusCode, e?.body || e);
-        // Optionally: remove invalid subscriptions if 410/404
-      })
-    ) ?? [];
+          payload
+        ).catch((e: any) => {
+          console.error("Push error", e?.statusCode, e?.body || e);
+          // Optionally: remove invalid subscriptions if 410/404
+        })
+      ) ?? [];
 
-  await Promise.all(promises);
+    await Promise.all(promises);
 
-  return new Response("ok", { status: 200 });
+    return new Response("ok", { 
+      status: 200,
+      headers: corsHeaders 
+    });
+  } catch (error) {
+    console.error("Function error:", error);
+    return new Response("Internal error", { 
+      status: 500,
+      headers: corsHeaders 
+    });
+  }
 });
