@@ -46,16 +46,6 @@ export default function AuthPage() {
         if (authError) throw authError
 
         if (authData.user) {
-          // Create profile
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: authData.user.id,
-              display_name: displayName || email.split('@')[0],
-            })
-
-          if (profileError) throw profileError
-
           // Redirect to dashboard
           router.push('/dashboard')
           router.refresh()
