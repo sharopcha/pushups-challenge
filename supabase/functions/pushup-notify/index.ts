@@ -8,12 +8,12 @@ const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT")!;
 
 webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
-const PROJECT_DB_URL = Deno.env.get("PROJECT_DB_URL")!;
-const SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const supabase = createClient(PROJECT_DB_URL, SERVICE_ROLE_KEY, {
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
