@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next';
+
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { PWAProvider } from '@/components/pwa-provider'
@@ -51,6 +53,7 @@ export default function RootLayout({
         >
           <PWAProvider />
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
