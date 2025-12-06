@@ -28,12 +28,16 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
+  console.log(`${req.method} request received`);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     return new Response('ok', { headers: corsHeaders });
   }
 
   if (req.method !== "POST") {
+    console.log('Non-POST request rejected');
     return new Response("Method not allowed", { 
       status: 405,
       headers: corsHeaders 
@@ -42,7 +46,22 @@ Deno.serve(async (req) => {
 
   try {
     const body = (await req.json()) as Payload;
+    console.log('Received payload:', body);
+
     const { userId, count } = body;
+
+    if (!userId || !count) {
+      console.error('Missing userId or count');
+      return new Response(
+        JSON.stringify({ error: 'Missing userId or count' }), 
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log(`Fetching subscriptions for user: ${userId}`);
 
     const { data: subs, error } = await supabase
       .from("push_subscriptions")
@@ -50,11 +69,27 @@ Deno.serve(async (req) => {
       .eq("user_id", userId);
 
     if (error) {
-      console.error(error);
-      return new Response("Error fetching subs", { 
-        status: 500,
-        headers: corsHeaders 
-      });
+      console.error('Database error:', error);
+      return new Response(
+        JSON.stringify({ error: 'Error fetching subscriptions' }), 
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    console.log(`Found ${subs?.length || 0} subscriptions`);
+
+    if (!subs || subs.length === 0) {
+      console.log('No subscriptions found, returning success');
+      return new Response(
+        JSON.stringify({ success: true, message: 'No subscriptions to notify' }), 
+        { 
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const payload = JSON.stringify({
@@ -63,8 +98,10 @@ Deno.serve(async (req) => {
       url: "/dashboard",
     });
 
+    console.log('Sending notifications...');
+
     const promises =
-      subs?.map((sub) =>
+      subs.map((sub) =>
         webpush.sendNotification(
           {
             endpoint: sub.endpoint,
@@ -76,21 +113,28 @@ Deno.serve(async (req) => {
           payload
         ).catch((e: any) => {
           console.error("Push error", e?.statusCode, e?.body || e);
-          // Optionally: remove invalid subscriptions if 410/404
         })
-      ) ?? [];
+      );
 
     await Promise.all(promises);
 
-    return new Response("ok", { 
-      status: 200,
-      headers: corsHeaders 
-    });
+    console.log('All notifications sent successfully');
+
+    return new Response(
+      JSON.stringify({ success: true }), 
+      { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   } catch (error) {
     console.error("Function error:", error);
-    return new Response("Internal error", { 
-      status: 500,
-      headers: corsHeaders 
-    });
+    return new Response(
+      JSON.stringify({ error: error.message || 'Internal error' }), 
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
   }
 });
