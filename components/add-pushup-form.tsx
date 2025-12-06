@@ -42,6 +42,18 @@ export function AddPushupForm({ userId }: AddPushupFormProps) {
 
       if (insertError) throw insertError
 
+      // Only call edge function in production
+      if (process.env.NODE_ENV === 'production') {
+        const { error: fnError } = await supabase.functions.invoke('pushup-notify', {
+          body: {
+            userId,
+            count: pushupCount
+          }
+        });
+
+        if (fnError) throw fnError
+      }
+
       // Reset form and refresh data
       setCount('')
       router.refresh()
