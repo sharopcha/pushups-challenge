@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { ensurePushSubscriptionAndNotify } from '@/lib/ensurePushSubscriptionAndNotify'
 
 interface AddPushupFormProps {
   userId: string
@@ -45,7 +44,19 @@ export function AddPushupForm({ userId }: AddPushupFormProps) {
 
       // Only call edge function in production
       if (process.env.NODE_ENV === 'production') {
-        await ensurePushSubscriptionAndNotify(pushupCount)
+        const { data: fnData, error: fnError } = await supabase.functions.invoke('pushup-notify', {
+          body: {
+            userId,
+            count: pushupCount
+          }
+        });
+
+        console.log('Function response:', fnData);
+        console.log('Function error:', fnError);
+
+        if (fnError) {
+          console.error('Full error details:', JSON.stringify(fnError, null, 2));
+        }
       }
 
       // Reset form and refresh data
